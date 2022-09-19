@@ -6,103 +6,113 @@ using UnityEngine;
 
 public class GenerateGrid : MonoBehaviour
 {
-    public GameObject block_Obj;
+    static GenerateGrid instance;
+
+    public static GenerateGrid Instance 
+    { 
+        get 
+        {
+            if (instance == null)
+                return null;
+            return instance;
+        }
+    }
+
+    public GameObject terrain_Obj;
     public GameObject objectToSpawn;
     public GameObject player;
 
-    Vector2 worldSize = new Vector2(10, 10);
-    int noisHeight = 5;
-    float GridOffset = 1.1f;
+    [SerializeField]int worldSize_X = 5;
+    [SerializeField]int worldSize_Y = 5;
+    [SerializeField]float GridOffset = 10.0f;
+
+    public int terrainSize = 100;
 
     Vector3 startPosition;
     Hashtable blockContainer = new Hashtable();
 
     List<Vector3> blockPosition = new List<Vector3>();
 
+    [Header("랜덤하게 소환할 Object(OR 장애물) Index")]
+    [SerializeField] int randomSpawnObjectIndex = 10;
+
     private void Start()
     {
-        for (int x = 0; x < worldSize.x; x++)
+        if (instance == null)
+            instance = this;
+
+        //startPosition = player.transform.position;
+        //SetGrid(startPosition.x, startPosition.y);
+        //SpawnObject();
+    }
+    //private void Update()
+    //{
+    //    if (Mathf.Abs(PlayerMove_X) >= GridOffset || Mathf.Abs(PlayerMove_Y) >= GridOffset)
+    //    {
+    //        SetGrid(PlayerLocation_X, PlayerLocation_Y);
+    //    }
+    //}
+
+
+    void SpawnObject()
+    {
+        for (int i = 0; i < randomSpawnObjectIndex; i++)
         {
-            for (int y = 0; y < worldSize.y; y++)
+            GameObject toPlaceObject = Instantiate(objectToSpawn, ObjectSpawnLocation(), Quaternion.identity);
+        }
+    }
+
+    Vector3 ObjectSpawnLocation()
+    {
+        int randIndex = Random.Range(0, blockPosition.Count);
+
+        Vector3 pos = new Vector3(
+            blockPosition[randIndex].x,
+            blockPosition[randIndex].y + 0.5f,
+            1
+            );
+
+        blockPosition.RemoveAt(randIndex);
+        return pos;
+    }
+
+    void SetGrid(float nowPos_X, float nowPos_Y)
+    {
+        for (int x = -worldSize_X; x < worldSize_X; x++)
+        {
+            for (int y = -worldSize_Y; y < worldSize_Y; y++)
             {
-                Vector3 pos = new Vector3(x * GridOffset, y * GridOffset, 0);
+                Vector3 pos = new Vector3(x * GridOffset + nowPos_X, y * GridOffset + nowPos_Y, 1);
 
-                GameObject block = Instantiate(block_Obj, pos, Quaternion.identity) as GameObject;
+                if (!blockContainer.ContainsKey(pos))
+                {
+                    GameObject block = Instantiate(terrain_Obj, pos, Quaternion.identity) as GameObject;
 
-                //blockContainer.Add(pos, block);
-                //blockPosition.Add(block.transform.position);
-                block.transform.SetParent(this.transform);
+                    blockContainer.Add(pos, block);
+                    blockPosition.Add(block.transform.position);
+                    block.transform.SetParent(this.transform);
+                }
             }
         }
     }
 
-    //private void Start()
-    //{
-    //    for (int x = -worldSizeX; x < worldSizeX; x++)
-    //    {
-    //        for (int z = -worldSizeZ; z < worldSizeZ; z++)
-    //        {
-    //            Vector3 pos = new Vector3(x * GridOffset, GenerateNoise(x, z, 8f) * noisHeight, z * GridOffset);
+    public int PlayerMove_X
+    {
+        get => (int)(player.transform.position.x - startPosition.x);
+    }
 
-    //            GameObject block = Instantiate(block_Obj, pos, Quaternion.identity) as GameObject;
+    int PlayerMove_Y
+    {
+        get => (int)(player.transform.position.y - startPosition.y);
+    }
 
-    //            blockContainer.Add(pos, block);
-    //            blockPosition.Add(block.transform.position);
-    //            block.transform.SetParent(this.transform);
-    //        }
-    //    }
-    //    SpawnObject();
-    //}
+    int PlayerLocation_X
+    {
+        get => (int)Mathf.Floor(player.transform.position.x);
+    }
 
-    //private void Update()
-    //{
-    //    if(Mathf.Abs(xPlayerMove) >=1 || Mathf.Abs(zPlayerMove) >= 1)
-    //    {
-    //        for (int x = -worldSizeX; x < worldSizeX; x++)
-    //        {
-    //            for (int z = -worldSizeZ; z < worldSizeZ; z++)
-    //            {
-    //                Vector3 pos = new Vector3(x + xPlayerLocation, GenerateNoise(x, z, 8f) * noisHeight, z + zPlayerLocation);
-
-    //                if(!blockContainer.ContainsKey(pos))
-    //                {
-    //                    GameObject block = Instantiate(block_Obj, pos, Quaternion.identity) as GameObject;
-
-    //                    blockContainer.Add(pos, block);
-    //                    blockPosition.Add(block.transform.position);
-    //                    block.transform.SetParent(this.transform);
-    //                }
-
-    //            }
-    //        }
-    //    }
-    //}
-
-    //public int xPlayerMove
-    //{
-    //    get => (int)(player.transform.position.x - startPosition.x);
-    //}
-
-    //int zPlayerMove
-    //{
-    //    get => (int)(player.transform.position.z - startPosition.z);
-    //}
-
-    //int xPlayerLocation
-    //{
-    //    get => (int)Mathf.Floor(player.transform.position.x);
-    //}
-
-    //int zPlayerLocation
-    //{
-    //    get => (int)Mathf.Floor(player.transform.position.z);
-    //}
-
-    //void SpawnObject()
-    //{
-    //    for (int c = 0; c < 20; c++)
-    //    {
-    //        GameObject toPlace_Obj = Instantiate(objectToSpawn, ObjectSpawnLocation(), Quaternion.identity);
-    //    }
-    //}
+    int PlayerLocation_Y
+    {
+        get => (int)Mathf.Floor(player.transform.position.y);
+    }
 }
