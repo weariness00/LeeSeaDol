@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: 01
   m_EditorClassIdentifier: 
   id: 0
-  Obj: {fileID: 0}
+  Obj: {fileID: 784152231802213176, guid: 60619c51be169124cbbbce307bc8435e, type: 3}
   image: {fileID: 0}
   stat:
     maxHp: 0
