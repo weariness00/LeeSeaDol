@@ -1,17 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 
 public class EndlessTerrain : MonoBehaviour
 {
     public const float maxViewDistance = 100;
-    public Transform viewer;
+    public Transform player;
+    public static Vector2 playerPosition;
 
-    public static Vector2 viewerPosition;
-    int terrainSize;
+    public GameObject terrain_Obj;
+    public int terrainSize;
     int terrainVisibleInViewDistance;
 
     Dictionary<Vector2, TerrainChunk> terrainChunkDictionary = new Dictionary<Vector2, TerrainChunk>();
@@ -19,13 +17,12 @@ public class EndlessTerrain : MonoBehaviour
 
     private void Start()
     {
-        terrainSize = GenerateGrid.Instance.terrainSize;
-        terrainVisibleInViewDistance = Mathf.RoundToInt(maxViewDistance/ terrainSize);
+        terrainVisibleInViewDistance = Mathf.RoundToInt(maxViewDistance / terrainSize);
     }
 
     private void Update()
     {
-        viewerPosition = new Vector2(viewer.position.x, viewer.position.y);
+        playerPosition = new Vector2(player.position.x, player.position.y);
         UpdateVisibleTerrains();
     }
 
@@ -37,8 +34,8 @@ public class EndlessTerrain : MonoBehaviour
         }
         terrainChunksVisibleLastUpdate.Clear();
 
-        int currentTerrain_PosX = Mathf.RoundToInt(viewerPosition.x / terrainSize);
-        int currentTerrain_PosY = Mathf.RoundToInt(viewerPosition.y / terrainSize);
+        int currentTerrain_PosX = Mathf.RoundToInt(playerPosition.x / terrainSize);
+        int currentTerrain_PosY = Mathf.RoundToInt(playerPosition.y / terrainSize);
 
         for (int yOffset = -terrainVisibleInViewDistance; yOffset <= terrainVisibleInViewDistance; yOffset++)
         {
@@ -46,7 +43,7 @@ public class EndlessTerrain : MonoBehaviour
             {
                 Vector2 viewedTerrainPos = new Vector2(currentTerrain_PosX + xOffset, currentTerrain_PosY + yOffset);
 
-                if(terrainChunkDictionary.ContainsKey(viewedTerrainPos))
+                if (terrainChunkDictionary.ContainsKey(viewedTerrainPos))
                 {
                     terrainChunkDictionary[viewedTerrainPos].UpdateTerrtainChunk();
                     if (terrainChunkDictionary[viewedTerrainPos].IsVisible())
@@ -56,7 +53,7 @@ public class EndlessTerrain : MonoBehaviour
                 }
                 else
                 {
-                    terrainChunkDictionary.Add(viewedTerrainPos, new TerrainChunk(viewedTerrainPos, terrainSize,transform));
+                    terrainChunkDictionary.Add(viewedTerrainPos, new TerrainChunk(terrain_Obj,viewedTerrainPos, terrainSize, transform));
                 }
             }
         }
@@ -67,23 +64,21 @@ public class EndlessTerrain : MonoBehaviour
         GameObject meshObject;
         Vector2 position;
         Bounds bounds;
-
-        public TerrainChunk(Vector2 pos, int size, Transform parent)
+        public TerrainChunk(GameObject obj, Vector2 pos, int size, Transform parent)
         {
             position = pos * size;
             bounds = new Bounds(position, Vector2.one * size);
             Vector3 pos_V3 = new Vector3(position.x, position.y, 0);
 
-            meshObject = Instantiate(GenerateGrid.Instance.terrain_Obj);
+            meshObject = Instantiate(obj);
             meshObject.transform.position = pos_V3;
-            meshObject.transform.localScale = Vector3.one * size / 1f;
             meshObject.transform.parent = parent;
             SetVisible(false);
         }
 
         public void UpdateTerrtainChunk()
         {
-            float viewerDstFromNearestEdge = Mathf.Sqrt(bounds.SqrDistance(viewerPosition));
+            float viewerDstFromNearestEdge = Mathf.Sqrt(bounds.SqrDistance(playerPosition));
             bool visible = viewerDstFromNearestEdge <= maxViewDistance;
             SetVisible(visible);
         }

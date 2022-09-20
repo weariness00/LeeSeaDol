@@ -1,7 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Net.Sockets;
-using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 public class GenerateGrid : MonoBehaviour
@@ -36,22 +34,18 @@ public class GenerateGrid : MonoBehaviour
     [Header("랜덤하게 소환할 Object(OR 장애물) Index")]
     [SerializeField] int randomSpawnObjectIndex = 10;
 
-    private void Start()
+    private void Awake()
     {
         if (instance == null)
             instance = this;
-
-        //startPosition = player.transform.position;
-        //SetGrid(startPosition.x, startPosition.y);
-        //SpawnObject();
     }
-    //private void Update()
-    //{
-    //    if (Mathf.Abs(PlayerMove_X) >= GridOffset || Mathf.Abs(PlayerMove_Y) >= GridOffset)
-    //    {
-    //        SetGrid(PlayerLocation_X, PlayerLocation_Y);
-    //    }
-    //}
+
+    private void Start()
+    {     
+        startPosition = player.transform.position;
+        SetGrid(startPosition.x, startPosition.y);
+        SpawnObject();
+    }
 
 
     void SpawnObject()
