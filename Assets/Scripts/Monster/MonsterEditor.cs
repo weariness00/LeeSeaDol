@@ -26,6 +26,10 @@ public class MonsterEditor : Editor
         {
             SpawnMonster();            
         }
+        else if(GUILayout.Button("Monster Clear"))
+        {
+            monsterSpawner_Script.monsterPool_Script[poolIndex].Clear();
+        }
     }
 
     void SpawnMonster()

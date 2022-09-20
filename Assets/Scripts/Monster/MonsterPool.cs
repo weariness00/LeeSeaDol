@@ -11,6 +11,8 @@ public class MonsterPool : MonoBehaviour
     [Range(0,100)]
     public int maxPoolIndex = 100;
 
+    public bool isAllSpawn = false; // 만약 모든 Monster들이 Active 상태라면
+
     private void Awake()
     {
         CreatMonster();
@@ -27,7 +29,7 @@ public class MonsterPool : MonoBehaviour
         }
     }
 
-    public void Spawn(int spawnIndex)
+    public void Spawn(int spawnIndex, Vector3 spawnPos)
     {
         for (int i = 0; i < maxPoolIndex; i++)
         {
@@ -35,10 +37,25 @@ public class MonsterPool : MonoBehaviour
                 continue;
 
             obj[i].SetActive(true);
+            obj[i].transform.position = spawnPos;
             spawnIndex--;
 
             if (spawnIndex.Equals(0))
-                break;
+            {
+                isAllSpawn = false;
+                return;
+            }
         }
+
+        isAllSpawn = true;
+    }
+
+    public void Clear()
+    {
+        for (int i = 0; i < maxPoolIndex; i++)
+        {
+            obj[i].SetActive(false);
+        }
+        isAllSpawn=false; 
     }
 }
